@@ -69,7 +69,7 @@ int main()
 	//changing colour pattern to 3  		
   	attron(COLOR_PAIR(3));
   	//displaying the initial statistics of the game
-  	mvprintw(H-3,2*H-2, "Snackoids Welcomes you to the game");
+  	mvprintw(H-3,2*H-2, "Snakoids Welcomes you to the game");
   	mvprintw(H-1,2*H-2, "Press enter and then an arrow key to start!!");
   	//offing the colour that is being used
   	attroff(COLOR_PAIR(3));
@@ -91,11 +91,11 @@ int main()
   	int obs_corr_y[5] = {H};
 
   	//initialing the game at i = 1
-  	int i = 1;
+  	int turn = 1;
 
   	//it just runs forver, as i++ is done inside the loop
   	//the only way you can get out if you hit or survive till 500 turns
-  	while(i > 0) {
+  	while(turn > 0) {
 
   		//the current coordinates of the player are updated here
   		//and stores at the first iteration of trail arrays
@@ -149,83 +149,101 @@ int main()
 	  		}
 
   		}
-
   		
-
+  		//if statement to check if the boundary of the wall is hit
+  		//and it changes itself
   		if( (b.y - 1) == H/2){
   			direc = true;
   		} else if((b.y + 1) == H + H/2){
   			direc = false;
   		}
 
-
+  		//if its going downwards than it allows it go downwards
   		if(direc == true){
+  			//increasing y by 1 micmicing going downwards
   			b.y++;
-  		} else {
+  		} 
+  		//else it starts going upwards
+  		else {
+  			//decreasing y by 1 mimicing going upwards
   			b.y--;
   		}
  		
-
+  		//refreshing the screen at each iteration of the loop
   		refresh();
+  		//erases everything that is on the screen
   		erase();  
 
   		srand (time(NULL)) ;
 
 
+  		//random number generater that changes the coordinates of all the obstacles
+  		//it happens after every 25 turns
+  		if(turn % 25 == 0){
 
-  		if(i % 25 == 0){
+  			//also updating the coordinates in the stored location
+
+  			//changing obs coordinates
   			obs.x = obs_corr_x[0] = random_num(H+1, 2*H-6, b.x, 2) ;
   			obs.y = obs_corr_y[0] = random_num(H/2+1, H-4, b.y, 1) ;
- 		// }else if(i % 17 == 0){
+ 			//changing obs1 coordinates
   			obs1.x = obs_corr_x[1] = random_num(H+1, 2*H-6, b.x, 2) ;
   			obs1.y = obs_corr_y[1] = random_num(H/2+1, H-4, b.y, 1) ;
-  		// }else if(i % 12 == 0) {
+  			//changing obs2 coordinates
   			obs2.x = obs_corr_x[2] = random_num(H+1, 2*H-6, b.x, 2) ;
   			obs2.y = obs_corr_y[2] = random_num(H/2+1, H-4, b.y, 1) ;
-  		// }else if(i % 9 == 0) {
+  			//changing ob3 coordinates
   			obs3.x = obs_corr_x[3] = random_num(H+1, 2*H-6, b.x, 2) ;
   			obs3.y = obs_corr_y[3] = random_num(H/2+1, H-4, b.y, 1) ;
-  		// }else {
+  			//changing obs4 coordinates
   			obs4.x = obs_corr_x[4] = random_num(H+1, 2*H-6, b.x, 2) ;
   			obs4.y = obs_corr_y[4] = random_num(H/2+1, H-4, b.y, 1) ;
   		}
 
 
-
+  		//colour on
   		attron(COLOR_PAIR(2));
 		
+		//displaying the obstacles with height 3 and width 5 characters		
   		for(int h = 0 ; h < 3 ; h++) {
 
   			for(int g = 0 ; g < 5 ; g++) {
-  				mvprintw(obs.y+h,obs.x+g,"x");
-  				mvprintw(obs1.y+h,obs1.x+g,"u");
-	  			mvprintw(obs2.y+h,obs2.x+g,"y");
-  				mvprintw(obs3.y+h,obs3.x+g,"g");
-  				mvprintw(obs4.y+h,obs4.x+g,"d");
+  				mvprintw(obs.y+h,obs.x+g,"x");     	//obs
+  				mvprintw(obs1.y+h,obs1.x+g,"u");	//obs1	
+	  			mvprintw(obs2.y+h,obs2.x+g,"y");	//obs2
+  				mvprintw(obs3.y+h,obs3.x+g,"g");	//obs3
+  				mvprintw(obs4.y+h,obs4.x+g,"d");	//obs4
   			}
 
   		}
+  		//colour off
   		attroff(COLOR_PAIR(2));
   		
+  		//colour on
   		attron(COLOR_PAIR(3));
 
+  		//for loops displying the box of the game
+
+  		//top and bottom of the arena
   		for(int i = 0 ; i < 2*H ; i++){
   			mvprintw(H/2,H + i,"_");
   			mvprintw(H + H/2,H + i,"-");
   		}
-
+  		//left and right of the arena
   		for(int i = 1 ; i < H ; i++){
   			mvprintw(H/2 + i,H,"|");
   			mvprintw(H/2 + i,3*H,"|");
   		}
 
-  		mvprintw(5, 10, "Count: %i", i);
+  		mvprintw(H/2-5, 2*H-6, "Count: %i", turn);
 
+  		//colour off
   		attroff(COLOR_PAIR(3));
   		
-
+  		//check if the player hit the obstacle
   		end = check(obs_corr_x, obs_corr_y, b.x, b.y);
 
+  		//if yes, then end the game with the lost message
   		if(end == -1){
   			erase();
   			mvprintw(H-1, 2*H-2, "You Lost !!");
@@ -235,7 +253,8 @@ int main()
   			return 0 ;
   		}
 
-  		if(i == 500){
+  		//if the number of turns exceed 250, then displaying winning message
+  		if(turn == 250){
   			erase();
   			mvprintw(H-1, 2*H-2, "You Won !!");
   			getch();
@@ -243,21 +262,32 @@ int main()
   			return 0 ;
   		}
 
+  		//colour on
   		attron(COLOR_PAIR(4));
-  			mvprintw(b.y,b.x,"o");
+  			//displaying player head
+  			mvprintw(b.y,b.x,"s");
+  		//colour off
   		attroff(COLOR_PAIR(4));
 
+  		//colour on
   		attron(COLOR_PAIR(1));
-  			for(int i = 0; i < 7; i++){
-  				mvprintw(trail_y[i], trail_x[i], "r");
-  			}  			
+  			//displaying the trail
+  			//with the exact words of the snakoid
+  			mvprintw(trail_y[1], trail_x[1], "n");
+  			mvprintw(trail_y[2], trail_x[2], "a");
+  			mvprintw(trail_y[3], trail_x[3], "k");
+  			mvprintw(trail_y[4], trail_x[4], "o");
+  			mvprintw(trail_y[5], trail_x[5], "i");
+  			mvprintw(trail_y[6], trail_x[6], "d");
+  		//colour off  			
   		attroff(COLOR_PAIR(1));
 
-      	i++;
+  		//turns increased by 1
+      	turn++;
       
   	}
 
-
+  	//close the window
   	endwin();
 
 	return 0;
@@ -265,26 +295,39 @@ int main()
 
 int random_num(int low, int high, int corr, int turn){
 
+	//generate a random number using random function
 	int random = low + (rand() % high);
 
+	//increasing the field of the player
 	turn += 2;
 
+	//while loop that checkes if the number generated 
+	//is beyond the protection area of the player
+	//Otherwise generates another number
 	while(random >= corr - turn && random <= corr + turn){
 		random = low + (rand() % high);
 	}
 
+	//returns the randomly generated number
 	return random;
 
 }
 
 int check(int* x_corr, int* y_corr, int x, int y)
 {
+	//for loop that goes through each five obstacles
 	for(int i = 0 ; i < 5 ; i++){
 
+		//for loop that creates a virtual width area of the obstacle
 		for(int u = 0 ; u < 5 ; u++){
+
+			//for loop that creates a virtual height of the obstackle
 			for(int h = 0 ; h < 3 ; h++){
 
+				//if statement that checks if the player is inside 
 				if( ( x_corr[i] + u ) == x && ( y_corr[i] + h ) == y){
+					//returns -1 to flag that the player is hit 
+					//and GAME OVER
 					return -1;
 				}
 
@@ -293,5 +336,6 @@ int check(int* x_corr, int* y_corr, int x, int y)
 
 	}
 
+	//return 0 to indicate green signal that its not a hit
 	return 0;
 }
