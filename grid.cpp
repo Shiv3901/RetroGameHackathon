@@ -1,3 +1,5 @@
+//Snakeoids starts
+
 #include <iostream>
 #include <ncurses.h>
 #include <unistd.h>
@@ -5,7 +7,7 @@
 #include <stdlib.h>
 #include <ctime>
 
-#define WIDTH 10
+//defining the box size in which the game whill be played
 #define H 30
 
 using namespace std;
@@ -33,7 +35,7 @@ typedef struct {
 int main()
 {
 
-	int trail_x[4], trail_y[4];
+	int trail_x[7], trail_y[7];
 
 	object scr;
 	int i = 1, count = 0;
@@ -49,6 +51,8 @@ int main()
 	init_pair(1, COLOR_BLACK, COLOR_WHITE);
 	init_pair(2, COLOR_WHITE, COLOR_RED);
 	init_pair(3, COLOR_GREEN, COLOR_BLACK);
+	init_pair(4, COLOR_BLACK, COLOR_CYAN);
+	
 
 	keypad(stdscr, true);
 
@@ -60,7 +64,7 @@ int main()
 
   	object b = {2*H,H,0,false,false};
 
-  	for(int i = 0 ; i < 4 ; i++){
+  	for(int i = 0 ; i < 7 ; i++){
   		trail_y[i] = H;
   		trail_x[i] = 2*H;
   	}
@@ -81,7 +85,10 @@ int main()
   	while(i > 0) {
 
 
-  		for(int i=3; i>1; i--){
+  		trail_x[0] = b.x;
+  		trail_y[0] = b.y;
+
+  		for(int i=7; i>0; i--){
   			trail_x[i] = trail_x[i-1];
   			trail_y[i] = trail_y[i-1];
   		}
@@ -107,8 +114,7 @@ int main()
   				break;
   		}
 
-  		trail_x[0] = b.x;
-  		trail_y[0] = b.y;
+  		
 
   		if( (b.y - 1) == H/2){
   			direc = true;
@@ -155,8 +161,6 @@ int main()
 
 
   		attron(COLOR_PAIR(2));
-
-		// mvaddch(y, x, PLAYER);
 		
   		for(int h = 0 ; h < 3 ; h++) {
 
@@ -206,19 +210,16 @@ int main()
   			endwin();
   			return 0 ;
   		}
-  		// mvvline(0,2*WIDTH,ACS_VLINE,scr.y);
-  		// mvvline(0,6*WIDTH,ACS_VLINE,scr.y);
-  		attron(COLOR_PAIR(1));
+
+  		attron(COLOR_PAIR(4));
   			mvprintw(b.y,b.x,"o");
+  		attroff(COLOR_PAIR(4));
 
-  			for(int y = 1 ; y < 4 ; y++){
-  				mvprintw(trail_y[y], trail_x[y], "r");
-  			}
+  		attron(COLOR_PAIR(1));
+  			for(int i = 0; i < 7; i++){
+  				mvprintw(trail_y[i], trail_x[i], "r");
+  			}  			
   		attroff(COLOR_PAIR(1));
-
-  		// for(i=-1;i<4;i++){
-    //   		mvprintw(b1.y,b1.x+i,"_");
-    //   	}
 
       	i++;
       
