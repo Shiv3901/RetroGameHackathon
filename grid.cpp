@@ -21,6 +21,15 @@ int random_num(int low, int high, int corr, int turn);
 //returning -1 confirms the hit
 int check(int* x_corr, int* y_corr, int x, int y);
 
+//function to wait to end the game
+void endgame();
+
+//print the box of the game
+void box();
+
+//display the rules of the game
+void rule();
+
 //struct object stores the x and y coordinates of the player
 //also obstacles are the same types created in it
 typedef struct {
@@ -40,6 +49,7 @@ int main()
 	init_pair(2, COLOR_WHITE, COLOR_RED);
 	init_pair(3, COLOR_GREEN, COLOR_BLACK);
 	init_pair(4, COLOR_BLACK, COLOR_CYAN);
+	init_pair(5, COLOR_WHITE, COLOR_BLACK);
 	
 	//starting off
 	keypad(stdscr, true);
@@ -64,15 +74,10 @@ int main()
 	int end = 0;
 
 	//initialising direc to true suggesting that it has only has to fall
-	bool direc = true;
+	bool direc_ver = true;
 
-	//changing colour pattern to 3  		
-  	attron(COLOR_PAIR(3));
-  	//displaying the initial statistics of the game
-  	mvprintw(H-3,2*H-2, "Snakoids Welcomes you to the game");
-  	mvprintw(H-1,2*H-2, "Press enter and then an arrow key to start!!");
-  	//offing the colour that is being used
-  	attroff(COLOR_PAIR(3));
+	box();
+	rule();
 
   	//Waiting for any key to be pressed
   	getch();
@@ -153,13 +158,13 @@ int main()
   		//if statement to check if the boundary of the wall is hit
   		//and it changes itself
   		if( (b.y - 1) == H/2){
-  			direc = true;
+  			direc_ver = true;
   		} else if((b.y + 1) == H + H/2){
-  			direc = false;
+  			direc_ver = false;
   		}
 
   		//if its going downwards than it allows it go downwards
-  		if(direc == true){
+  		if(direc_ver == true){
   			//increasing y by 1 micmicing going downwards
   			b.y++;
   		} 
@@ -168,6 +173,7 @@ int main()
   			//decreasing y by 1 mimicing going upwards
   			b.y--;
   		}
+
  		
   		//refreshing the screen at each iteration of the loop
   		refresh();
@@ -219,26 +225,7 @@ int main()
   		//colour off
   		attroff(COLOR_PAIR(2));
   		
-  		//colour on
-  		attron(COLOR_PAIR(3));
-
-  		//for loops displying the box of the game
-
-  		//top and bottom of the arena
-  		for(int i = 0 ; i < 2*H ; i++){
-  			mvprintw(H/2,H + i,"_");
-  			mvprintw(H + H/2,H + i,"-");
-  		}
-  		//left and right of the arena
-  		for(int i = 1 ; i < H ; i++){
-  			mvprintw(H/2 + i,H,"|");
-  			mvprintw(H/2 + i,3*H,"|");
-  		}
-
-  		mvprintw(H/2-5, 2*H-6, "Count: %i", turn);
-
-  		//colour off
-  		attroff(COLOR_PAIR(3));
+  		box();
   		
   		//check if the player hit the obstacle
   		end = check(obs_corr_x, obs_corr_y, b.x, b.y);
@@ -246,28 +233,28 @@ int main()
   		//if yes, then end the game with the lost message
   		if(end == -1){
   			erase();
-  			mvprintw(H-1, 2*H-2, "You Lost !!");
-
-  			getch();
-  			endwin();
+  			attron(COLOR_PAIR(1));
+  			mvprintw(H-1, 2*H-5, "You Lost !!");
+  			mvprintw(H+3, 2*H-8, "Press E to exit!!");
+  			attroff(COLOR_PAIR(1));
+  			box();
+  			endgame();
   			return 0 ;
   		}
 
   		//if the number of turns exceed 250, then displaying winning message
   		if(turn == 250){
   			erase();
-  			mvprintw(H-1, 2*H-2, "You Won !!");
-  			getch();
-  			endwin();
+  			attron(COLOR_PAIR(1));
+  			mvprintw(H-1, 2*H-5, "You Won !!");
+  			mvprintw(H+3, 2*H-8, "Press E to exit!!");
+  			attroff(COLOR_PAIR(1));
+  			box();
+  			endgame();
   			return 0 ;
   		}
 
-  		//colour on
-  		attron(COLOR_PAIR(4));
-  			//displaying player head
-  			mvprintw(b.y,b.x,"s");
-  		//colour off
-  		attroff(COLOR_PAIR(4));
+  		
 
   		//colour on
   		attron(COLOR_PAIR(1));
@@ -282,6 +269,20 @@ int main()
   		//colour off  			
   		attroff(COLOR_PAIR(1));
 
+  		//colour on
+  		attron(COLOR_PAIR(4));
+  			//displaying player head
+  			mvprintw(b.y,b.x,"s");
+  		//colour off
+  		attroff(COLOR_PAIR(4));
+
+  		//colour on
+  		attron(COLOR_PAIR(3));
+  			//displaying the turn count
+  			mvprintw(H/2-2,2*H-5, "Count: %i", turn);
+  		//colour off
+  		attroff(COLOR_PAIR(3));
+
   		//turns increased by 1
       	turn++;
       
@@ -293,6 +294,9 @@ int main()
 	return 0;
 }
 
+//function to generate and return a random number
+//It also makes sure that the grid generated is not at
+//the current player coordinates
 int random_num(int low, int high, int corr, int turn){
 
 	//generate a random number using random function
@@ -313,6 +317,8 @@ int random_num(int low, int high, int corr, int turn){
 
 }
 
+//check function checks if the player hit the obstacles
+//returning -1 confirms the hit
 int check(int* x_corr, int* y_corr, int x, int y)
 {
 	//for loop that goes through each five obstacles
@@ -339,3 +345,60 @@ int check(int* x_corr, int* y_corr, int x, int y)
 	//return 0 to indicate green signal that its not a hit
 	return 0;
 }
+
+//function to wait to end the game
+void endgame()
+{
+	char input = getch();
+
+	while(input != 'e'){
+		input = getch();
+	}
+
+	endwin();
+}
+
+//print the box of the game
+void box()
+{
+	//colour on
+  	attron(COLOR_PAIR(3));
+
+  	//for loops displying the box of the game
+
+  	//top and bottom of the arena
+  	for(int i = 0 ; i < 2*H ; i++){
+  		mvprintw(H/2,H + i,"_");
+  		mvprintw(H + H/2,H + i,"-");
+  	}
+  	//left and right of the arena
+  	for(int i = 1 ; i < H ; i++){
+  		mvprintw(H/2 + i,H,"|");
+  		mvprintw(H/2 + i,3*H,"|");
+  	}
+
+  	//colour off
+  	attroff(COLOR_PAIR(3));
+}
+
+//display the rules of the game
+void rule()
+{
+	mvprintw(H/2+5, 2*H-14, "SNAKOIDS: SNAKE + ASTEROIDS");
+	
+	//colour on
+	attron(COLOR_PAIR(3));
+	//displaying the initial statistics of the game
+  	mvprintw(H-5, 2*H-23, "1. Snakoids Welcomes you to the game");
+  	mvprintw(H-3, 2*H-23, "2. Press enter and then an arrow key to start!!");
+  	mvprintw(H-1, 2*H-23, "3. Game is simply, press the arrow keys super fast !!");
+  	mvprintw(H+1, 2*H-23, "4. Youn win by either surviving 250 turns...");
+  	mvprintw(H+3, 2*H-23, "5. Or lose by hitting one of the 5 obstacles");
+  	mvprintw(H+5, 2*H-23, "6. Press Q anytime to exit the game..");
+
+  	//offing the colour that is being used
+  	attroff(COLOR_PAIR(3));
+}
+
+
+
