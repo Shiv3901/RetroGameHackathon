@@ -12,106 +12,142 @@
 
 using namespace std;
 
+//function to generate and return a random number
+//It also makes sure that the grid generated is not at
+//the current player coordinates
 int random_num(int low, int high, int corr, int turn);
 
+//check function checks if the player hit the obstacles
+//returning -1 confirms the hit
 int check(int* x_corr, int* y_corr, int x, int y);
 
+//struct object stores the x and y coordinates of the player
+//also obstacles are the same types created in it
 typedef struct {
 	int x;
 	int y;
-	int c;
-
-	bool mov_hor;
-	bool mov_ver;
 } object;
 
-typedef struct {
-	int x;
-	int y;
-
-	bool disp;
-} obstacle;
-
+//main function where the game runs
 int main()
 {
-
-	int trail_x[7], trail_y[7];
-
-	object scr;
-	int i = 1, count = 0;
-	int n = 3;
-	int end = 0;
-	int intersection = 0;
-
-	bool direc = true;
-
+	//intiating the ncurses terminal screen	
 	initscr();
 
+	//assigning colour pairs and using them afterwards
 	start_color();
 	init_pair(1, COLOR_BLACK, COLOR_WHITE);
 	init_pair(2, COLOR_WHITE, COLOR_RED);
 	init_pair(3, COLOR_GREEN, COLOR_BLACK);
 	init_pair(4, COLOR_BLACK, COLOR_CYAN);
 	
-
+	//starting off
 	keypad(stdscr, true);
 
 	noecho();
 
 	curs_set(0);
 
-	getmaxyx(stdscr, scr.y, scr.x);
+	//initialising the player at the very centre of the arena
+  	object b = {2*H,H};
 
-  	object b = {2*H,H,0,false,false};
+  	//two arrays that stores the trails of the player as snake
+	int trail_x[7], trail_y[7];
 
+  	//initialising the trails to the initial point of starting
   	for(int i = 0 ; i < 7 ; i++){
   		trail_y[i] = H;
   		trail_x[i] = 2*H;
   	}
 
-  	mvprintw(4,0, "What the heck!!\n\nPress enter to start!!\n\n");
+  	//initialising end to 0 and game stops when end equates to -1
+	int end = 0;
 
+	//initialising direc to true suggesting that it has only has to fall
+	bool direc = true;
+
+	//changing colour pattern to 3  		
+  	attron(COLOR_PAIR(3));
+  	//displaying the initial statistics of the game
+  	mvprintw(H-3,2*H-2, "Snackoids Welcomes you to the game");
+  	mvprintw(H-1,2*H-2, "Press enter and then an arrow key to start!!");
+  	//offing the colour that is being used
+  	attroff(COLOR_PAIR(3));
+
+  	//Waiting for any key to be pressed
   	getch();
 
-  	obstacle obs = {H, H/2+1, true};      //x
-  	obstacle obs1 = {3*H-5, H/2+1, true};	//u
-  	obstacle obs2 = {H,3*H/2-3, true};	//y
-  	obstacle obs3 = {3*H-5, 3*H/2-3, true};	//g
-  	obstacle obs4 = {2*H-2, H-1, true};		//d
+  	//declaring five obstacles that are avoided to win the game
+  	//the coordinated are aligned with the size of the box
+  	object obs = {H, H/2+1};      	//x will be displayed
+  	object obs1 = {3*H-5, H/2+1};	//u will be displayed
+  	object obs2 = {H,3*H/2-3};		//y will be displayed
+  	object obs3 = {3*H-5, 3*H/2-3};	//g will be displayed
+  	object obs4 = {2*H-2, H-3};		//d will be displayed
   	
+  	//stores the current coordinates of the obstacles
+  	//will be used to check if that's a hit
   	int obs_corr_x[5] = {3*H/2};
   	int obs_corr_y[5] = {H};
 
+  	//initialing the game at i = 1
+  	int i = 1;
+
+  	//it just runs forver, as i++ is done inside the loop
+  	//the only way you can get out if you hit or survive till 500 turns
   	while(i > 0) {
 
-
+  		//the current coordinates of the player are updated here
+  		//and stores at the first iteration of trail arrays
   		trail_x[0] = b.x;
   		trail_y[0] = b.y;
 
+  		//for loop that empties the first space for the new coordinates
+  		//and the others are copies to right new iterations
   		for(int i=7; i>0; i--){
   			trail_x[i] = trail_x[i-1];
   			trail_y[i] = trail_y[i-1];
   		}
 
-  		switch(getch()){
+  		//initialising the condition to 0 
+  		int condition = 0;
 
-  			case KEY_LEFT:
-  				if((b.x - 1) >= H){
-  					b.x--;
-  				}
-  				break;
+  		//while loop that runs unitl a valid arrow key is entered
+  		while( condition != 1 ){
 
-  			case KEY_RIGHT:
-  				if((b.x + 1) <= 3*H){
-  					b.x++;
-  				}
-  				break;
+  			//switch statement for the key entered
+	  		switch(getch()){
 
+	  			//case for the left arrow key
+	  			case KEY_LEFT:
+	  				//statement to check if the border of the box is hit
+	  				//if not, then and then the move is made
+	  				if((b.x - 1) >= H){
+	  					//changing the x coordinate that mimics the movement
+	  					//of the player to the left
+	  					b.x--;
+	  				}
+	  				//updating the condition to convey that it is allowed
+	  				condition = 1;
+	  				break;
 
-  			case 'q': 
-  				endwin(); 
-  				return 0;
-  				break;
+	  			//same as the left arrow key case 
+	  			case KEY_RIGHT:
+	  				if((b.x + 1) <= 3*H){
+	  					b.x++;
+	  				}
+	  				condition = 1;
+	  				break;
+
+	  			//if the key q is hit, then exit the game
+	  			case 'q': 
+	  				//terminate the ncurses window
+	  				endwin(); 
+	  				//returning 0 to convey completion of the game
+	  				return 0;
+	  				break;
+	  		}
+
   		}
 
   		
@@ -153,10 +189,6 @@ int main()
   			obs4.x = obs_corr_x[4] = random_num(H+1, 2*H-6, b.x, 2) ;
   			obs4.y = obs_corr_y[4] = random_num(H/2+1, H-4, b.y, 1) ;
   		}
-
-  		intersection = check(obs_corr_x, obs_corr_y, b.x, b.y);
-
-  		
 
 
 
@@ -203,7 +235,7 @@ int main()
   			return 0 ;
   		}
 
-  		if(i == 100){
+  		if(i == 500){
   			erase();
   			mvprintw(H-1, 2*H-2, "You Won !!");
   			getch();
